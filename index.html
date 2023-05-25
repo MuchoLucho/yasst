@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>🌙 Sleep tracker </title>
+        <link rel="icon" href="./favicon.png" type="image/x-icon">
+        <style type="text/css">
+            body {
+                cursor: pointer;
+                text-align: center;
+                font-size: 100%;
+            }
+
+            .box {
+                height: 100vh;
+            }
+
+            .small-text {
+                font-size: 8vw;
+                color: wheat;
+                margin: 0.35rem;
+            }
+
+            #time {
+                font-size: 12vw;
+                color: white;
+                margin: 0.35rem;
+            }
+        </style>
+    </head>
+
+    <body id="body" onclick="changeState()">
+        <div class="box">
+            <p class="small-text" style="font-size: 4vw;">You are <span id="state" style="color: white; font-style: oblique;">awake</span></p>
+            <p class="small-text" id="previous">00:00:00</p>
+            <p id="time">00:00:00 <span id="demo"></span></p>
+            <p class="small-text" id="next">00:00:00</p>
+
+        </div>
+
+        <script>
+            const AWAKE_COLOR = "#DAB287";
+            const SLEEPING_COLOR = "#775141";
+            setBackground (AWAKE_COLOR);
+
+            var state = "awake"; // or sleep
+            var wakeTime = null; // set to an hour:minute time
+            var sleepTime = null;
+
+            function twoDigits(number){
+                return  number < 10 ? "0" + number : number;
+            }
+
+            function getTimeFromNumber(number) {
+                var tmp = number;
+                var hours = Math.floor(number / 3600);
+                tmp = number - hours * 3600;
+                var minutes = Math.floor(tmp / 60);
+                tmp = number - hours * 3600 - minutes * 60;
+                var seconds = tmp;
+                return twoDigits(hours) + ":" + twoDigits(minutes) + ":" + twoDigits(seconds);
+            }
+
+            function getNumberFromDate(date) {
+                return date.getHours() * 3600 + date.getMinutes() * 60 + date.getSeconds();
+            }
+
+            function setBackground(color) {
+                document.getElementById("body").style.backgroundColor = color;
+            }
+
+            function setElement(name, value) {
+                document.getElementById(name).innerHTML = value;
+            }
+
+            function setTime() {
+                now = new Date();
+                setElement("time", twoDigits(now.getHours()) + ":" + twoDigits(now.getMinutes()) + ":" + twoDigits(now.getSeconds()));
+            }
+            setInterval(function () {
+                setTime();
+            }, 2000);
+
+            function changeState() {
+                console.log("changeState()");
+                now = getNumberFromDate(new Date());
+                console.log("now is " + now);
+                var backgroundColor = AWAKE_COLOR;
+                if (state != "sleeping")
+                    backgroundColor = SLEEPING_COLOR;
+                
+                setBackground(backgroundColor);
+
+                if (state == "awake") {
+                    console.log("change to sleep");
+                    state = "sleeping";
+                    if (sleepTime == null) {
+                        sleepTime = getNumberFromDate(new Date());
+                    } else {
+                        sleepTime = Math.round((sleepTime + now) / 2);
+                    }
+                } else if (state == "sleeping") {
+                    state = "awake";
+                    if (wakeTime == null) {
+                        wakeTime = getNumberFromDate(new Date());
+                    } else {
+                        wakeTime = Math.round((wakeTime + now) / 2);
+                    }
+                } else {
+                    console.log("initialize state to sleep");
+                    state = "sleeping";
+                }
+                if (state == "sleeping") {
+                    setElement("previous", getTimeFromNumber(sleepTime));
+                    setElement("next", getTimeFromNumber(wakeTime));
+                } else if (state == "awake") {
+                    setElement("previous", getTimeFromNumber(wakeTime));
+                    setElement("next", getTimeFromNumber(sleepTime));
+                } else {
+                    console.log("state not set yet...");
+                }
+                setElement ("state", state);
+                console.log("state is " + state);
+                console.log("sleepTime is " + sleepTime);
+                console.log("wakeTime is " + wakeTime);
+            }
+        </script>
+    </body>
+</html>
